@@ -6,6 +6,5 @@ pandas==2.2.3
 scikit_learn==1.5.2
 scipy==1.14.1
 tqdm==4.65.0
-trl==0.11.4
 ucimlrepo==0.0.7
 wandb==0.18.5
