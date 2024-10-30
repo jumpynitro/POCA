@@ -1,0 +1,134 @@
+# From the Hydra docs (https://hydra.cc/docs/tutorials/basic/your_first_app/defaults/):
+# - If multiple configs define the same value, the last one wins.
+# - If the primary config contains both config values and a defaults list, include `_self_` to
+#   specify the composition order.
+
+# Specify trainer before data so that the data config can override the trainer config.
+defaults:
+  - _self_
+  - trainer: random_forest
+  - data: uci/magic
+  - model: random_forest
+  - override hydra/launcher: joblib
+task: 1
+# defaults:
+#   - override hydra/launcher: joblib
+
+# task: 1
+#data: data=uci/magic
+# hydra:
+#   launcher:
+#     # override the number of jobs for joblib
+#     n_jobs: 10
+acquisition:
+  batch_size: 1  # This only affects BADGE and random acquisition
+  epig_probs_adjustment: null  # Optional adjustment to predictive distribution
+  epig_probs_target: null  # Target class distribution
+  epig_using_matmul: False  # Use efficient implementation using matrix multiplication
+  n_target_samples: 100  # Number of sampled target inputs
+  objective: bald-po  # Acquisition function
+
+
+partially_observed: True
+
+po_dumb_imput_not_acq: False
+po_dumb_imput_acq: False
+
+results_main_dir: null
+feature_selection:
+  num_subset_pool: 10
+  is_cost_based: False
+  include_y_cost: False
+  different_x_cost: False #
+  stochastic_cost: False
+  cost_restriction: False
+  imputation_type: LLM
+
+llm_cfg:
+  #data_dir: data
+  data_dir: data
+  #llm_dir: "/mnt/pdata/nja46/LLM_generated"
+  llm_dir: "."
+  #llm_dir: "/mnt/batch/tasks/shared/LS_root/mounts/clusters/nja46-on20240730v2/code/Users/nja46"
+
+  add_name: ""
+  add_name_results: ""
+  len_hist: 0
+  len_pool: 0
+  mc_samples: 15 #15 #10 # Number of monte-carlo samples
+  #config:
+  llm_name: mistral # distill_gpt2
+  set_feat_percentage: 0.5 # feature labels partially observability
+  pool_set_n_samples: 1000
+  pool_set_type: "Hist"  # Options are All, Hist, Pool, Hist-Pool
+  max_steps: 10000 #5000 #10000
+  lr_rate: 7.5e-5 #1e-4 #2.5e-5
+  cfg_r: 32
+  cfg_lora_alpha: 64
+  per_device_batch: 2
+  is_testing: False
+  max_budget: 200
+  #missing_with_relevance: True
+  missing_with_relevance: False
+  syn_class: mid
+  use_name_mc_samples: False
+
+  epochs: 200
+  batch_size: 24
+  batch_size_generation: 100
+  max_mc_samples: 0
+  max_mc_samples_random: False
+
+  prompt_dict: True
+
+  llm_seed: 0
+
+cuda: False
+
+data:
+  _target_: src.data.Data
+  dataset:
+    _partial_: True
+    data_dir: ${directories.data}
+  batch_sizes:
+    pool: ${data.batch_sizes.test}
+    target: ${acquisition.n_target_samples}
+    test: -1
+    train: -1
+    val: ${data.batch_sizes.test}
+
+directories:
+  base: .
+  data: ${directories.base}/data
+  results_base: ${directories.base}/results/raw
+  results_run: ${hydra:runtime.output_dir}
+
+experiment_name: dev
+
+  # hydra:
+  #   job:
+  #     config:
+  #       override_dirname:
+  #         exclude_keys:
+  #           - data
+  #           - experiment_name
+  # job_logging:
+  #   handlers:
+  #     file:
+  #       filename: ${hydra:runtime.output_dir}/run.log
+  # run:
+  #   dir: ${directories.results_base}/${experiment_name}/${now:%Y-%m-%d-%H-%M-%S}
+  # sweep:
+  #   dir: ${hydra.run.dir}
+  #   subdir: ${hydra.job.override_dirname}
+  #
+hydra:
+ launcher:
+   #override the number of jobs for joblib
+   n_jobs: 85
+
+
+rng:
+  _target_: src.utils.set_rngs
+  constrain_cudnn: False
+  seed: 0
