@@ -1,6 +1,5 @@
-batchbald_redux==2.0.5
 hydra-core==1.3.2
-numpy==1.25.1
+hydra-joblib-launcher
 omegaconf==2.3.0
 pandas==2.2.3
 scikit_learn==1.5.2
