@@ -7,3 +7,5 @@ scipy==1.14.1
 tqdm==4.65.0
 ucimlrepo==0.0.7
 wandb==0.18.5
+matplotlib
+scienceplots
