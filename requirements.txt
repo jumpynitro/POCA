@@ -9,4 +9,4 @@ ucimlrepo==0.0.7
 wandb==0.18.5
 matplotlib
 scienceplots
-latex
+seaborn
