@@ -9,6 +9,7 @@ import math
 import scienceplots
 
 plt.style.use('science')
+plt.rcParams["text.usetex"] = False  # Disable LaTeX
 
 # Constants
 N_RUNS = 125
