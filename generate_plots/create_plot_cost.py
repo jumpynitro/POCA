@@ -8,8 +8,7 @@ import seaborn as sns
 import math
 import scienceplots
 
-plt.style.use('science')
-plt.rcParams["text.usetex"] = False  # Disable LaTeX
+#plt.style.use('science')
 
 # Constants
 N_RUNS = 125
