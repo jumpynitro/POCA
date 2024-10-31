@@ -40,7 +40,6 @@ def obtain_data(root_folder, objective, data, llm, pool_type, pdict, seed_g, IS_
                 else:
                     data_acc = pd.read_csv(f'{results_dir}/testing.csv').test_acc.to_numpy()
                     data_cost = pd.read_csv(f'{results_dir}/cost_log.csv').cost.to_numpy()
-                    data_readed = np.maximum.accumulate(compute_corresponding_cost(data_acc, data_cost, ALL_COST))
         except Exception as e:
             print(f"Not seed: {this_seed}", "  ", results_dir, "Exception:", e)
             continue
@@ -210,22 +209,22 @@ def main():
                 if args.experiment_type == 'vary_llm':
                     all_dict_exp['random_LLM'] = {'name': 'Random', 'color': 'gray'}
                     all_dict_exp[f'{model}_LLM'] = {'name': 'BALD', 'color': 'o2'}
-                    all_dict_exp[f'{model}-po_LLM'] = {'name': '$\\mu$PO-EIG', 'color': 'teal'}
+                    all_dict_exp[f'{model}-po_LLM'] = {'name': 'uPO-EIG', 'color': 'teal'}
                     all_dict_exp[obtain_full_name(model)] = {'name': 'Oracle', 'color': 'teal'}
                 elif args.experiment_type == 'vary_model' or args.experiment_type == 'vary_model_main' :
                     all_dict_exp['random_LLM'] = {'name': 'Random', 'color': 'gray'}
                     all_dict_exp[f'{model}_LLM'] = {'name': 'Vanilla AL metric', 'color': 'o2'}
-                    all_dict_exp[f'{model}-po_LLM'] = {'name': '$\\mu$POCA metric (ours)', 'color': 'teal'}
+                    all_dict_exp[f'{model}-po_LLM'] = {'name': 'uPOCA metric (ours)', 'color': 'teal'}
                     all_dict_exp[obtain_full_name(model)] = {'name': 'Oracle', 'color': 'teal'}
                 elif args.experiment_type == 'pool_camera':
                     all_dict_exp['random_LLM'] = {'name': 'Random', 'color': 'gray'}
                     all_dict_exp[f'{model}_LLM'] = {'name': 'Vanilla AL metric', 'color': 'o2'}
-                    all_dict_exp[f'{model}-po_LLM'] = {'name': '$\\mu$POCA metric (ours)', 'color': 'teal'}
+                    all_dict_exp[f'{model}-po_LLM'] = {'name': 'uPOCA metric (ours)', 'color': 'teal'}
                     all_dict_exp[obtain_full_name(model)] = {'name': 'Oracle', 'color': 'teal'}
                 else:
                     all_dict_exp['random_LLM'] = {'name': 'Random', 'color': 'gray'}
                     all_dict_exp[f'{model}_LLM'] = {'name': 'Vanilla AL metric', 'color': 'o2'}
-                    all_dict_exp[f'{model}-po_LLM'] = {'name': '$\\mu$POCA metric (ours)', 'color': 'teal'}
+                    all_dict_exp[f'{model}-po_LLM'] = {'name': 'uPOCA metric (ours)', 'color': 'teal'}
                     all_dict_exp[obtain_full_name(model)] = {'name': 'Oracle', 'color': 'teal'}
                 try:
                     seed_used =  2 if data in ['banking', 'cardio'] and llm_used == 'gemma2-unsloth' else THIS_SEED
