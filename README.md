@@ -19,11 +19,18 @@ This repository provides code and instructions to run and reproduce experiments 
 
 ### Step 1: Set up the Conda environment
 
+For GSM trainign and sampling we use unsloth training with the following configuration. At the moment of running the results torch (2.3 was installed, now torch 2.5 is automatically installed)
+```
+conda create --name poca python=3.10 pytorch-cuda=12.1 pytorch cudatoolkit xformers -c pytorch -c nvidia -c xformers -y
+conda activate poca
+
+pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+pip install --no-deps trl peft accelerate bitsandbytes
+```
+
 Clone the repository and create a Conda environment:
 ```bash
 git clone https://github.com/jumpynitro/POCA.git
-conda create -n poca python=3.9
-conda install jupyter
 conda activate poca
 ```
 
@@ -56,7 +63,7 @@ python unsloth_train_llm.py \
     llm_cfg.pool_set_type='Hist' \
     llm_cfg.llm_name='mistral3-unsloth' \
     llm_cfg.llm_dir="LLM_dir" \
-    llm_cfg.add_name='seed-1-pdict-true' \
+    llm_cfg.add_name='-seed1-pdict-true' \
     llm_cfg.llm_seed=1
 ```
 
@@ -70,52 +77,54 @@ python unsloth_eval_llm.py \
     llm_cfg.llm_name='mistral3-unsloth' \
     llm_cfg.batch_size_generation=100 \
     llm_cfg.mc_samples=8 \
-    llm_cfg.add_name='seed-1-pdict-true' \
-    llm_cfg.llm_dir="LLM_dir"
+    llm_cfg.add_name='-seed1-pdict-true' \
+    llm_cfg.llm_dir="LLM_Hist"
 ```
 
 #### Step 3: Train the RF Model and Run Acquisition Process
 
-Use the following command to train the RF model and execute the acquisition:
-```bash
-python main.py --multirun 'rng.seed=range(60)' \
-    data="uci/magic" \
-    results_main_dir="rf_results_Hist" \
-    acquisition.objective=bald-po,bald,random,full-bald \
-    model=random_forest \
-    trainer=random_forest \
-    llm_cfg.llm_name='mistral3-unsloth' \
-    llm_cfg.pool_set_type='Hist' \
-    llm_cfg.add_name='seed-1-pdict-true' \
-    llm_cfg.llm_dir="LLM_dir"
-```
 
-For this specific case we can use the following script:
+1. **Acquistion with GSMs**
+    Use the following command to train the RF model and execute the acquisition:
+    ```bash
+    python main.py --multirun 'rng.seed=range(60)' \
+        data="uci/magic" \
+        results_main_dir="rf_results_Hist" \
+        acquisition.objective=bald-po,bald,random,full-bald \
+        model=random_forest \
+        trainer=random_forest \
+        llm_cfg.llm_name='mistral3-unsloth' \
+        llm_cfg.pool_set_type='Hist' \
+        llm_cfg.add_name='-seed1-pdict-true' \
+        llm_cfg.llm_dir="LLM_Hist"
+    ```
+    
+    For this specific case we can use the following script:
 
-```
-python generate_plots/create_plot_general.py --experiment_type specific
-```
+    ```
+    python generate_plots/create_plot_general.py --experiment_type specific
+    ```
 
+2. **Cost based acquisition**
+    To run acquisition with subset of features acquired run:
+    ```bash
+    python main.py --multirun 'rng.seed=range(60)' \
+        data="uci/magic" \
+        results_main_dir="rf_results_Hist" \
+        acquisition.objective=bald-po-feature-0.2,bald-po-feature-0.6 \
+        model=random_forest \
+        trainer=random_forest \
+        llm_cfg.llm_name='mistral3-unsloth' \
+        llm_cfg.pool_set_type='Hist' \
+        llm_cfg.add_name='-seed1-pdict-true' \
+        llm_cfg.llm_dir="LLM_dir"
+    ```
 
-To run acquisition with subset of features acquired run:
-```bash
-python main.py --multirun 'rng.seed=range(60)' \
-    data="uci/magic" \
-    results_main_dir="rf_results_Hist" \
-    acquisition.objective=bald-po-feature-0.2,bald-po-feature-0.6 \
-    model=random_forest \
-    trainer=random_forest \
-    llm_cfg.llm_name='mistral3-unsloth' \
-    llm_cfg.pool_set_type='Hist' \
-    llm_cfg.add_name='seed-1-pdict-true' \
-    llm_cfg.llm_dir="LLM_dir"
-```
+    and for visualizing 
 
-and for visualizing 
-
-```
-python generate_plots/create_plot_cost.py --experiment_type specific
-```
+    ```
+    python generate_plots/create_plot_cost.py
+    ```
 
 ---
 
@@ -140,11 +149,12 @@ You can reproduce most of the paper's results by following these steps:
      ```
 
 3. **Run models using RF and acquisition metrics**: PO-EIG, EIG, Random, and EIG (all features):
-   - RF training and acquisition on historical data:
+   1. RF training and acquisition on historical data:
      ```bash
      bash jobs/run_rf_eig.sh
      ```
-   - RF training and acquisition on pool data:
+
+   2. RF training and acquisition on pool data:
      ```bash
      bash jobs/run_rf_eig_pool.sh
      ```
@@ -158,6 +168,10 @@ You can reproduce most of the paper's results by following these steps:
    ```bash
    bash jobs/run_rf_cost.sh
    ```
+6. **Plots some results
+   Results EIG (run 3.1) and EPIG (run 4) ```python generate_plots/create_plot_general.py --experiment_type vary_model_main --output_file model_main.pdf```
+
+   Results Varying LLMs ```python generate_plots/create_plot_general.py --experiment_type vary_llm --output_file llm_main.pdf```
 
 ---
 ## Citation
@@ -169,6 +183,5 @@ If our paper or code helped you in your own research, please cite our work as:
     title={Partially Observable Cost-Aware Active-Learning with Large Language Models},
     author={Nicol{\'a}s Astorga and Tennison Liu and Nabeel Seedat and Mihaela van der Schaar},
     booktitle={The Thirty-Eighth Annual Conference on Neural Information Processing Systems},
-    year={2024},
-    url={https://openreview.net/forum?id=OOxotBmGol}
+    year={2024}
 }
