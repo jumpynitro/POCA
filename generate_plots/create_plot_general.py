@@ -7,7 +7,7 @@ import scienceplots
 import json
 import os
 
-#plt.style.use('science')
+plt.style.use('science')
 
 # Constants
 N_RUNS = 150
