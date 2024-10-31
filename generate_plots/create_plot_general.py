@@ -3,11 +3,11 @@ import pandas as pd
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import scienceplots
+#import scienceplots
 import json
 import os
 
-plt.style.use('science')
+#plt.style.use('science')
 
 # Constants
 N_RUNS = 150

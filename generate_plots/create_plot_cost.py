@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import math
-import scienceplots
+#import scienceplots
 
 #plt.style.use('science')
 
